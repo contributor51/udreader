@@ -1,0 +1,185 @@
+%\documentclass[11pt,letterpaper]{memoir} % for a long document
+\documentclass[11pt,letterpaper,article]{memoir} % for a short document
+
+\usepackage[utf8]{inputenc} % set input encoding to utf8
+\usepackage{listings}
+
+%%% ToC (table of contents) APPEARANCE
+\maxtocdepth{subsection} % include subsections
+\renewcommand{\cftchapterpagefont}{}
+\renewcommand{\cftchapterfont}{}     % no bold!
+
+%%% HEADERS & FOOTERS
+\pagestyle{ruled} % try also: empty , plain , headings , ruled , Ruled , companion
+
+%%% CHAPTERS
+\chapterstyle{article} % try also: default , section , hangnum , companion , article, demo
+
+\renewcommand{\chaptitlefont}{\Huge\sffamily\raggedright} % set sans serif chapter title font
+\renewcommand{\chapnumfont}{\Huge\sffamily\raggedright} % set sans serif chapter number font
+
+%%% SECTIONS
+\maxsecnumdepth{subsection} % number subsections
+
+\setsecheadstyle{\Large\sffamily\raggedright} % set sans serif section font
+\setsubsecheadstyle{\large\sffamily\raggedright} % set sans serif subsection font
+
+
+\title{UdReader User's Manual}
+\author{Matt Donnelly}
+\date{March 1, 2014} % Delete this line to display the current date
+
+%%% BEGIN DOCUMENT
+\begin{document}
+
+\maketitle
+\tableofcontents* % the asterisk means that the contents itself isn't put into the ToC
+
+
+
+%%% INTRO %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Introduction}
+UdReader is a library of reading/parsing routines that attempt to parse most common utility data formats used for storing time series data. The goal of the software is to provide a flexible library, useful on most any platform and for most any set of analysis or plotting tool available and commonly used in the electric power industry. 
+
+
+
+%%% QUICK START %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Quick Start}
+
+In Matlab:
+
+\lstset{language=Matlab}
+\begin{lstlisting}
+NET.addAssembly('fullpathtolibrary\UdReader.dll');
+import MTech.UdReader.*
+rdr = UdReader('filename.ext');
+
+% Get all analog data from the file
+alldata = rdr.GetData(); 
+
+% Create a time vector
+t = alldata.Data(:,1);  
+
+% Plot the first channel
+plot(t, alldata.Data(:,2)), legend(alldata.Name{2})
+\end{lstlisting}
+
+
+%%% API %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{API Overview}
+\section{Namespace}
+The API classes are defined in the {\em MTech.UdReader} namespace:
+
+\lstset{language=C}
+\begin{lstlisting}
+using MTech.UdReader;
+\end{lstlisting}
+
+\section{Classes}
+At present there is exactly one class exposed in the MTech.UdReader namespace, the {\em UdReader} class. The only valid constructor takes a string argument containing the name of the file to be read using either relative or absolute path.
+
+\lstset{language=C}
+\begin{lstlisting}
+UdReader rdr = new UdReader("mycomtradefile.cfg");
+\end{lstlisting}
+
+\section{Public Properties}
+Once a class is established one property, {\em FullFileInfo} is exposed to the user. The FullFileInfo property contains a full listing of the typical properties of all channels in the file. The property is a struct\footnote{It's actually an F\# record, not a C\# struct. They are close enough in useage to allow the mis-statement.} in a format similar to the JSIS Matlab format. Assuming a valid UdReader named {\em rdr} has been instantiated, you would get the contents of the FullFileInfo property as follows:
+
+\lstset{language=C}
+\begin{lstlisting}
+FileContents info = new FileContents();
+info = rdr.FullFileInfo;
+\end{lstlisting}
+
+The {\em FileContents} struct has the following format (in F\#\footnote{Note that an F\# {\em float} is a .NET System.Double.} syntax):
+
+\lstset{language=Caml}
+\begin{lstlisting}
+type FileContents = { 
+    StartTime : DateTime 
+    TimeUnits : float 
+    Name : string array 
+    Type : string array 
+    Units : string array 
+    Title : string 
+    Data : float [,]
+    }
+\end{lstlisting}
+
+You would therefore get the StartTime, assuming you have a FileContents object named {\em info}, as follows:
+
+\lstset{language=C}
+\begin{lstlisting}
+DateTime start = new DateTime;
+start = info.StartTime;
+\end{lstlisting}
+
+In F\# the same code might look like this:
+
+\lstset{language=Caml}
+\begin{lstlisting}
+let start = 
+  UdReader("mycomtrade.cfg").FullFileContents.StartTime
+\end{lstlisting}
+
+The fields of the struct have the following meaning:
+\begin{itemize}
+  \item StartTime is a System.DateTime object representing the time at which t = 0 in the data. The time at which t = 0 is commonly the first point in the data file, but not always. (Note: The time vector is the first column of the Data array. See below for more information.) 
+  \item TimeUnits is a System.Double representing the number of seconds elapsed in one interval of the time vector. In most cases TimeUnits will be 1.0, representing one second. Say, for example, that TimeUnits were 0.001. Then the elapsed time between 1.0 and 2.0 in the time vector would be one millisecond. In this manner we can accomodate a wide range of time spans from years to microseconds.
+  \item Name is an array of System.String containing the names of all channels in the Data array. The first entry in the Name array should be "Time". There is an exception for the FullFileInfo struct where the Data array is empty and Name contains all names available in the file. This feature is often used for searching through all of the channel names. 
+  \item Type is an array of System.String containing the type of data in the channel. A channel type is "V", "I" "F", etc. Providing informative type designators for all kinds of data files is a challenge, and we are certain that the Type field will evolve over time.
+  \item Units is an array of System.String containing the units associated with the channel. Units are, for example, "kV", "A", "HZ".
+  \item Title is a System.String containing the title of the data file, if any.
+  \item Data is a 2D array of System.Double containing the scaled data read from the file. The first column of Data is always time. 
+\end{itemize}
+
+
+
+\section{Public Methods}
+The UdReader class exposes three methods, each with overloads. 
+
+\subsection{GetData}
+The GetData method takes one argument -- an array of integers specifying which channels the user wishes to retrieve from the data file. An overload allows the user to get all channels by calling the GetData method without any arguments. The method returns a FileContents object containing metadata and results for the selected channels
+
+\lstset{language=C}
+\begin{lstlisting}
+// Returns all channels
+FileContents allChans = rdr.GetData(); 
+
+// Return channel 7
+int[] c7 = new int[1] {7};
+FileContents chan7 = rdr.GetData(c7);
+\end{lstlisting}
+
+
+\subsection{FindByName}
+The {\em FindByName} method searches the {\em Name} field of FullFileInfo using regular expressions. Regular expressions provide a powerful search framework. To learn more about how to form regular expression search strings the reader can google it. Entering a simple search word works fine if you don't want to become an expert in regular expression syntax. The method returns an array of integers suitable for use by GetData.
+
+\lstset{language=C}
+\begin{lstlisting}
+int[] found;
+// Returns indices found by searching on srchStr
+found = rdr.FindByName("findme"); 
+
+// Return indices matching the search
+string[] substations = new string[3] {"Sub[0-9]", "Bus[45]"};
+found = rdr.FindByName(substations);
+\end{lstlisting}
+
+
+\subsection{FindByNamei}
+{\em FindByNamei} and its overload works exactly the same as FindByName but with case-insensitive matching.
+
+
+
+
+
+
+
+%%% API %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Helper Functions and Common Workflows}
+
+
+
+\end{document}

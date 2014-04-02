@@ -1,0 +1,7 @@
+**/bin/
+**/obj/
+docs/*.log
+docs/*.aux
+docs/*.toc
+docs/*.gz
+**/*.suo
