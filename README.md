@@ -22,7 +22,7 @@ With luck, this project will become a useful reader for various formats of time 
 
 
 #For users
-The best way to get started is to click on the folder labeled *binaries* above, or at http://github.com/contributor51/udreader if you are not currently looking at the *udreader* page. Download the library "UdReader.dll". That's all you need to have if you wish to incorporate the udreader into your work platform.
+The best way to get started is to click on the folder labeled *compiled-lib* above, or at http://github.com/contributor51/udreader if you are not currently looking at the *udreader* page. Download the library "UdReader.dll". That's all you need to have if you wish to incorporate the udreader into your work platform.
 
 Users may also want to take advantage of the helper functions included in the *helpers* folder above or at the GitHub link in the preceding paragraph. The helper functions show you how to use the udreader within some of the common analysis and plotting tools.
 
