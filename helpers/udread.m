@@ -21,16 +21,18 @@ function y = udread( fname, channels, path2dll )
 %% Parse the input arguments
 switch nargin
     case 1
-        channels = false;
+        isDataRequested = false;
         path2dll = which('UdReader.dll'); 
     case 2
         if isnumeric(channels)
+		    isDataRequested = true;
             path2dll = which('UdReader.dll'); 
         else
             path2dll = channels;
-            channels = false;
+            isDataRequested = false;
         end
     case 3
+	    isDataRequested = true;
     otherwise
 end
 if ~exist(path2dll, 'file') 
@@ -45,7 +47,7 @@ rdr = MTech.UdReader.UdReader(fname);
 rdrout = rdr.FullFileInfo;
 
 %% Read the file data
-if nargin > 1 
+if isDataRequested
     if isempty(channels), rdrout = rdr.GetData();
     else rdrout = rdr.GetData(channels);
     end
