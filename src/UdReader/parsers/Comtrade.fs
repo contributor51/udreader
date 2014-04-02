@@ -75,10 +75,10 @@ let guessType (ph:string, uu:string) =
 // Fill FileInformation object from a GeChfFileInfo type
 let translateChannelInfo (info:ComtradeFileInfo) = 
     // Comtrade channel names will be ch_id
-    // Comtrade channel desc will be ch_id:ph:uu:ccbm
+    // Comtrade channel desc will be ch_id:ph:uu:ccbm:minxxx:maxyyy
     let builddescAsync (def:ComtradeChannelDefA) = 
         async {let n = def.Chid
-               let d = [def.Chid; def.Ph; def.Uu; def.Ccbm] 
+               let d = [def.Chid; def.Ph; def.Uu; def.Ccbm; "min" + string def.Min; "max" + string def.Max] 
                let t, p, a, u = guessType (def.Ph, def.Uu) 
                // Use special case for the time vector, which is the first column of the data.
                return match t,n with
