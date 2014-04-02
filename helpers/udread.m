@@ -45,7 +45,7 @@ rdr = MTech.UdReader.UdReader(fname);
 rdrout = rdr.FullFileInfo;
 
 %% Read the file data
-if channels 
+if nargin > 1 
     if isempty(channels), rdrout = rdr.GetData();
     else rdrout = rdr.GetData(channels);
     end
@@ -55,6 +55,7 @@ end
 y.StartTime = double(rdrout.StartTime.Ticks) * 1e-7/86400 + 367;
 y.TimeUnits = rdrout.TimeUnits;
 y.Name = cell(rdrout.Name);
+y.Description = cell(rdrout.Description);
 y.Type = cell(rdrout.Type);
 y.Units = cell(rdrout.Units);
 y.Title = char(rdrout.Title);
