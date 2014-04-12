@@ -18,11 +18,6 @@ function y = udread( fname, channels, path2dll )
 %   Y is a matlab struct in WECC JSIS format.
 %
 
-%% Check Matlab version
-if strcmp(computer('arch'), 'win32')
-    error('Must be running 64 bit Matlab.')
-end
-
 %% Parse the input arguments
 switch nargin
     case 1
