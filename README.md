@@ -21,6 +21,9 @@ With luck, this project will become a useful reader for various formats of time 
 * R -- pending
 
 
+#For Matlab users
+Click on the *Download zip* button on the right side of the udreader home page. When the zip file is safely stored on your computer, open it and extract "UdReader.dll" from the *compiled-lib* folder. Also exract all m-files from the *helpers* folder. Save all of these files in a folder on the Matlab path. Throw the zip file away. In Matlab, read the help for "udread.m".
+
 #For users
 The best way to get started is to click on the *Download zip* button above, or at http://github.com/contributor51/udreader if you are not currently looking at the *udreader* page. After you download the zip file, extract "UdReader.dll" from the *compiled-lib* folder. That's all you need to have if you wish to incorporate the udreader into your work platform. You can throw away everything else if you don't want to worry about the source code.
 
