@@ -18,6 +18,11 @@ function y = udread( fname, channels, path2dll )
 %   Y is a matlab struct in WECC JSIS format.
 %
 
+%% Check for 64-bit Matlab
+if ~strcmp(computer('arch'), 'win64')
+    error('UdReader only works with 64-bit Matlab.')
+end
+
 %% Parse the input arguments
 switch nargin
     case 1
@@ -25,14 +30,14 @@ switch nargin
         path2dll = which('UdReader.dll'); 
     case 2
         if isnumeric(channels)
-		    isDataRequested = true;
+            isDataRequested = true;
             path2dll = which('UdReader.dll'); 
         else
             path2dll = channels;
             isDataRequested = false;
         end
     case 3
-	    isDataRequested = true;
+        isDataRequested = true;
     otherwise
 end
 if ~exist(path2dll, 'file') 
