@@ -12,7 +12,20 @@ function jplot( jsisstruct, findstr )
 %   matches.
 %
 
+% Get the channels to plot. This will throw a warning if the jsis struct
+% is not valid.
 chans = jfind(jsisstruct, findstr);
+
+% Warn if no channels found
+if isempty(chans), warning('No matching channels found.'); return, end
+
+% Warn if no data is present
+if isempty(jsisstruct.Data)
+    warning('No data present in the Data field.'); 
+	return
+end
+
+% Plot and label
 plot(jsisstruct.Data(:,1), jsisstruct.Data(:,chans))
 legend(jsisstruct.Name{chans})
 xlabel('Time (s)')
