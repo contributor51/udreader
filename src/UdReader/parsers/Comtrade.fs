@@ -207,6 +207,7 @@ let parseRates ((finfo:ComtradeFileInfo), rows) =
             match rowlist with
             | [] -> failwith "Error parsing rates."
             | hd::tl ->
+                // flds will be two entries: rate, endsample
                 let flds = splitstr hd 
                 try 
                     // newrate        ,    newsmpl                      , newrows
@@ -221,7 +222,10 @@ let parseRates ((finfo:ComtradeFileInfo), rows) =
                 | (r, e, s)::_ -> e + (float (newsmpl - s)/newrate) 
             (newrate, endtime, newsmpl)::acc
         // If finished with rates, return the accumulated list
-        if n >= nrates then {finfo with Rates = (List.rev acc')}, newrows
+        if n >= nrates then 
+            {finfo with Rates = (List.rev acc')
+                        NumSamples = match List.head acc' with
+                                     | _, _, s -> s}, newrows
         else parseRate newrows acc' (n+1)
     parseRate (List.tail rows) [] 1 
 
@@ -404,12 +408,16 @@ let processAsciiAsync (cfg:ComtradeFileInfo) channels2read fname =
                seq {for row in csv.Rows do 
                     // Each row is idx, time, analogs..., digitals...
                     let vals = row.Columns 
-                    let a,d = scale (vals.[0].AsInteger64() |> uint32, 
-                                     vals.[1].AsFloat(), 
-                                     [|for i in 2..nanalogs+1 -> vals.[i].AsFloat(missingValues = [|""; " "|])|], 
-                                     [||])
-                    yield a }
-           return array2D arr } 
+                    let cnt, tm, algs, digs = 
+                        vals.[0].AsInteger64() |> uint32, 
+                        vals.[1].AsFloat(), 
+                        [|for i in 2..nanalogs+1 -> vals.[i].AsFloat(missingValues = [|""; " "|])|], 
+                        [||]
+                    if cnt <= cfg.NumSamples then
+                        let a,d = scale (cnt, tm, algs, digs)
+                        yield a }
+           return array2D arr 
+    } // end async block
 
 // Processes a binary comtrade dat file
 let processBinaryAsync (cfg:ComtradeFileInfo) channels2read fname = 
@@ -462,17 +470,21 @@ let processBinaryAsync (cfg:ComtradeFileInfo) channels2read fname =
            // Read until the end
            let arr = 
                seq {while mm.Read(row, 0, nbytes) >= nbytes do 
-                    let a,d = scale (BitConverter.ToUInt32(row, 0), 
-                                     BitConverter.ToUInt32(row, 4) |> float, 
-                                     [|for i in 1 .. nanalogs -> 
-                                           match cfg.FileType with 
-                                           | ComtradeDatFileFmt.Binary -> BitConverter.ToInt16(row, 8+(i-1)*2) |> float
-                                           | ComtradeDatFileFmt.Binary32  -> BitConverter.ToInt32(row, (i+1)*4) |> float
-                                           | ComtradeDatFileFmt.Float32  -> BitConverter.ToSingle(row, (i+1)*4) |> float
-                                           | _ -> failwith "Could not correctly parse file type." |], 
-                                     [||])
-                    yield a }
-           return array2D arr }
+                    let cnt, tm, algs, digs = 
+                        BitConverter.ToUInt32(row, 0), 
+                        BitConverter.ToUInt32(row, 4) |> float, 
+                        [|for i in 1 .. nanalogs -> 
+                            match cfg.FileType with 
+                            | ComtradeDatFileFmt.Binary -> BitConverter.ToInt16(row, 8+(i-1)*2) |> float
+                            | ComtradeDatFileFmt.Binary32  -> BitConverter.ToInt32(row, (i+1)*4) |> float
+                            | ComtradeDatFileFmt.Float32  -> BitConverter.ToSingle(row, (i+1)*4) |> float
+                            | _ -> failwith "Could not correctly parse file type." |], 
+                        [||]
+                    if cnt <= cfg.NumSamples then
+                        let a,d = scale (cnt, tm, algs, digs)
+                        yield a }
+           return array2D arr 
+    } // end async block
 
 
 
@@ -483,11 +495,23 @@ let processBinaryAsync (cfg:ComtradeFileInfo) channels2read fname =
 // Read header information from the chf file. 
 let readComtradeHeader (finfo:UdFileInformation) = 
     // Create a new Comtrade file info record
-    let cinfo = {Version = 0u; StationName = ""; RecorderName = ""; NumAnalogs = 0u
-                 Analogs = []; NumDigitals = 0u; Digitals = []; NominalFreq = 0.0
-                 Rates = []; StartTime = DateTime(1970,1,1); TrigTime = DateTime(1970,1,1)
-                 FileType = ComtradeDatFileFmt.Ascii; TimeMult = None; TimeCode = None
-                 TimeQual = None; DataPtr = []}
+    let cinfo = {Version = 0u 
+                 StationName = ""
+                 RecorderName = ""
+                 NumAnalogs = 0u
+                 Analogs = []
+                 NumDigitals = 0u
+                 Digitals = []
+                 NominalFreq = 0.0
+                 Rates = [] // Each entry of list is a tuple: rate, endTimeForThisRate, endSampleForThisRate
+                 NumSamples = 0u // This is identical to endSample for the last entry of the rates list
+                 StartTime = DateTime(1970,1,1)
+                 TrigTime = DateTime(1970,1,1)
+                 FileType = ComtradeDatFileFmt.Ascii
+                 TimeMult = None
+                 TimeCode = None
+                 TimeQual = None
+                 DataPtr = []}
     // Get a view into a memory-mapped file
     use mm = getMMView 0L finfo.FileName 
     // Make a TextReader out of the mmview stream
