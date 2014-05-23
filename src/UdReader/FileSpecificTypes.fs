@@ -52,6 +52,7 @@ type ComtradeFileInfo =
      Digitals : ComtradeChannelDefD list
      NominalFreq : float
      Rates : (float * float * uint32) list // rate * endtime for this group * samplenum
+     NumSamples : uint32 // This is equal to samplenum for the last entry of Rates
      StartTime : DateTime
      TrigTime : DateTime
      FileType : ComtradeDatFileFmt
