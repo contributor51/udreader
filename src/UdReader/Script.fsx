@@ -17,11 +17,11 @@ open MTech.UdReader
 // Define your library scripting code here
 //let u = UdReader(@"D:\Users\mdonnelly\Documents\projects\chf\0\C37118-CJB_0-20130619000000.cfg") // PSLF_cases\Wscc9busGenLoss.chf  PSLF_cases\09hsp1a1\chans\case1.chf
 //let u = UdReader(@"D:\Users\mdonnelly\Documents\data\PSLF_cases\09hsp1a1\chans\case1.chf") // PSLF_cases\Wscc9busGenLoss.chf  PSLF_cases\09hsp1a1\chans\case1.chf
-//let u = UdReader(@"D:\Users\mdonnelly\Documents\data\comtrade\testdata\testbincomtrade.cfg") //testasciicomtrade testbincomtrade
+let u = UdReader(@"D:\Users\mdonnelly\Documents\data\comtrade\testdata\testasciicomtrade.cfg") //testasciicomtrade testbincomtrade
 //let u = UdReader(@"D:\Users\mdonnelly\Documents\data\comtrade\testdata\0\C37118-CJB_0-20130619000000.cfg")
 //let u = UdReader(@"D:\Users\mdonnelly\Documents\data\comtrade\testdata\00\C37118-CJB-20130619000000.cfg")
 //let u = UdReader(@"D:\Users\mdonnelly\Documents\data\comtrade\testdata\01\C37118-CJB-20130619000000.cfg")
-let u = UdReader(@"D:\Users\mdonnelly\Documents\data\PSLF_cases\2mach\chans\case1.chf")
+//let u = UdReader(@"D:\Users\mdonnelly\Documents\data\PSLF_cases\2mach\chans\case1.chf")
 //printfn "%A" u.Config
 
 
