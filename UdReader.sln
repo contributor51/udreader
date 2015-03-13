@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 2013
+VisualStudioVersion = 12.0.31101.0
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "UdReader", "src\UdReader\UdReader.fsproj", "{CE10158F-7B62-42AC-83FD-0DE650361E44}"
 	ProjectSection(ProjectDependencies) = postProject
 		{E5E55BC8-08BF-47F0-8BE6-7B91CB93E80A} = {E5E55BC8-08BF-47F0-8BE6-7B91CB93E80A}
@@ -21,13 +23,15 @@ Global
 		{CE10158F-7B62-42AC-83FD-0DE650361E44}.Debug|x64.ActiveCfg = Debug|Any CPU
 		{CE10158F-7B62-42AC-83FD-0DE650361E44}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CE10158F-7B62-42AC-83FD-0DE650361E44}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CE10158F-7B62-42AC-83FD-0DE650361E44}.Release|x64.ActiveCfg = Release|Any CPU
+		{CE10158F-7B62-42AC-83FD-0DE650361E44}.Release|x64.ActiveCfg = Release|x64
+		{CE10158F-7B62-42AC-83FD-0DE650361E44}.Release|x64.Build.0 = Release|x64
 		{E5E55BC8-08BF-47F0-8BE6-7B91CB93E80A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E5E55BC8-08BF-47F0-8BE6-7B91CB93E80A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E5E55BC8-08BF-47F0-8BE6-7B91CB93E80A}.Debug|x64.ActiveCfg = Debug|Any CPU
 		{E5E55BC8-08BF-47F0-8BE6-7B91CB93E80A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E5E55BC8-08BF-47F0-8BE6-7B91CB93E80A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E5E55BC8-08BF-47F0-8BE6-7B91CB93E80A}.Release|x64.ActiveCfg = Release|Any CPU
+		{E5E55BC8-08BF-47F0-8BE6-7B91CB93E80A}.Release|x64.ActiveCfg = Release|x64
+		{E5E55BC8-08BF-47F0-8BE6-7B91CB93E80A}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
