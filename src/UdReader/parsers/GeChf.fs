@@ -241,7 +241,7 @@ let readGeChfData (finfo:UdFileInformation) channels2read =
 
 
 
-//version             0 (int32)
+//version             0 (int32) this format is for v18
 //subversion          4 (int32)
 //nchans              16 (int32)
 //nmodels             20 (int32)
