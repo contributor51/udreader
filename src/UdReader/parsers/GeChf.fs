@@ -117,10 +117,10 @@ let parseModels bytearr byteptr (ver, subver) nmodels =
             let ntypes = BitConverter.ToUInt32(bytearr, ptr+48) |> int 
             // Now parse all of the types within this model
             let chans, newptr = 
-//                if ver < 19u then
+                if ver < 19u then
                     parseModelTypes bytearr (ptr+52) channelprototype acc ntypes
-//                else
-//                    parseModelTypes bytearr (ptr+92) channelprototype acc ntypes
+                else
+                    parseModelTypes bytearr (ptr+92) channelprototype acc ntypes
             // Recurse until all models for this file are finished
             parseModel newptr chans (n-1)
     // Start the recursion with an empty accumulator
@@ -133,6 +133,13 @@ let parseChfInfo bytearr =
     let nmodels = BitConverter.ToInt32(bytearr, 20)
     // Get the channel definitions
     let chans, dataptr = parseModels bytearr 65 (ver, subver) nmodels
+    // Set pointer to the beginning of data section. Need to add 7240 bytes after
+    // the end of the channel definitions. I don't know what's in this data block.
+    let bytptr =
+        if ver < 19u then
+            (dataptr+7240) |> uint32
+        else
+            (dataptr+7240+52) |> uint32 
     // Establish a channel definition for the time vector
     let tdef = 
         {FmBus = 0u, "", 0.0f; ToBus = 0u, "", 0.0f; ModelName = "Time    "; TypeName = "t   "
@@ -147,9 +154,7 @@ let parseChfInfo bytearr =
         PlotXLabel = bytearr.[32..41] |> getStringFromByteArr 
         // Add the tdef to the beginning of the channel list
         Channels = tdef :: chans 
-        // Set pointer to the beginning of data section. Need to add 7240 bytes after
-        // the end of the channel definitions. I don't know what's in this data block.
-        BytePointer = (dataptr+7240) |> uint32 }
+        BytePointer = bytptr }
     if hdr.Version < 17u || hdr.Version > 20u then 
         let errmsg = "Invalid chf file. Incorrect version number."
         raise (System.IO.InvalidDataException(errmsg)) 
@@ -226,9 +231,9 @@ let readGeChfData (finfo:UdFileInformation) channels2read =
     // sequence to a 2D array of doubles.
     let data = 
         seq {
-            while (mm.Read(row, 0, rowsize) >= rowsize) do //&& (BitConverter.ToUInt32(row,0) > 0u) do 
+            while (mm.Read(row, 0, rowsize) >= rowsize) && (BitConverter.ToUInt32(row,0) > 0u) do 
                 let newrow = [|for i in 1 .. num2read -> BitConverter.ToSingle(row, i*4)|]
-                printfn "%A" newrow//(BitConverter.ToUInt32(row,0))
+                //printfn "%A" newrow //(BitConverter.ToUInt32(row,0))
                 yield Array.filterByIndex channels2read newrow }
         |> array2D
         |> Array2D.map (fun x -> double x)
