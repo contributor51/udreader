@@ -90,7 +90,7 @@ let parseModelTypes bytearr byteptr (proto:GeChfChannelDef) chans ntypes =
 
 // Parses a model. A model in a chf file defines part of the channel name. A
 // model contains several types, which equate to  measurement channels. 
-let parseModels bytearr byteptr nmodels = 
+let parseModels bytearr byteptr (ver, subver) nmodels = 
     let rec parseModel ptr acc n = 
         // If finished with models, return the accumulated list of all channels parsed so far
         if n <= 0 then (List.rev acc), ptr
@@ -116,7 +116,11 @@ let parseModels bytearr byteptr nmodels =
                 PlotSelect = BitConverter.ToUInt32(bytearr, ptr+36) } 
             let ntypes = BitConverter.ToUInt32(bytearr, ptr+48) |> int 
             // Now parse all of the types within this model
-            let chans, newptr = parseModelTypes bytearr (ptr+52) channelprototype acc ntypes
+            let chans, newptr = 
+//                if ver < 19u then
+                    parseModelTypes bytearr (ptr+52) channelprototype acc ntypes
+//                else
+//                    parseModelTypes bytearr (ptr+92) channelprototype acc ntypes
             // Recurse until all models for this file are finished
             parseModel newptr chans (n-1)
     // Start the recursion with an empty accumulator
@@ -124,9 +128,11 @@ let parseModels bytearr byteptr nmodels =
 
 // Parses a chf file.
 let parseChfInfo bytearr = 
+    let ver = BitConverter.ToUInt32(bytearr, 0)
+    let subver = BitConverter.ToUInt32(bytearr, 4)
     let nmodels = BitConverter.ToInt32(bytearr, 20)
     // Get the channel definitions
-    let chans, dataptr = parseModels bytearr 65 nmodels
+    let chans, dataptr = parseModels bytearr 65 (ver, subver) nmodels
     // Establish a channel definition for the time vector
     let tdef = 
         {FmBus = 0u, "", 0.0f; ToBus = 0u, "", 0.0f; ModelName = "Time    "; TypeName = "t   "
@@ -134,8 +140,8 @@ let parseChfInfo bytearr =
          Min = 0.0f; Max = 0.0f; PlotSelect = 0u } 
     // Create a GeChfFileInfo record
     let hdr = {
-        Version = BitConverter.ToUInt32(bytearr, 0)
-        Subversion = BitConverter.ToUInt32(bytearr, 4)
+        Version = ver
+        Subversion = subver
         Tmin4plot = BitConverter.ToSingle(bytearr, 24) 
         Tmax4plot = BitConverter.ToSingle(bytearr, 28) 
         PlotXLabel = bytearr.[32..41] |> getStringFromByteArr 
@@ -162,7 +168,7 @@ let estimateHdrSize (mm:MemoryMappedFiles.MemoryMappedViewStream) =
     // Get the number of channels at position 16
     let nchans = BitConverter.ToInt32(bytearr, 16) 
     // Approximate the size of the header, including channel definitions.
-    let approxHdrSize = 65 + (84 * nchans) 
+    let approxHdrSize = 65 + (90 * nchans)
     ((approxHdrSize / 4096) + 1) * 4096
 
 
@@ -220,8 +226,9 @@ let readGeChfData (finfo:UdFileInformation) channels2read =
     // sequence to a 2D array of doubles.
     let data = 
         seq {
-            while (mm.Read(row, 0, rowsize) >= rowsize) && (BitConverter.ToUInt32(row,0) > 0u) do 
-                let newrow = [|for i in 1 .. num2read -> BitConverter.ToSingle(row, i*4)|] 
+            while (mm.Read(row, 0, rowsize) >= rowsize) do //&& (BitConverter.ToUInt32(row,0) > 0u) do 
+                let newrow = [|for i in 1 .. num2read -> BitConverter.ToSingle(row, i*4)|]
+                printfn "%A" newrow//(BitConverter.ToUInt32(row,0))
                 yield Array.filterByIndex channels2read newrow }
         |> array2D
         |> Array2D.map (fun x -> double x)
