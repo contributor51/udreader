@@ -173,7 +173,7 @@ let estimateHdrSize (mm:MemoryMappedFiles.MemoryMappedViewStream) =
     // Get the number of channels at position 16
     let nchans = BitConverter.ToInt32(bytearr, 16) 
     // Approximate the size of the header, including channel definitions.
-    let approxHdrSize = 65 + (90 * nchans)
+    let approxHdrSize = 65 + (100 * nchans)
     ((approxHdrSize / 4096) + 1) * 4096
 
 

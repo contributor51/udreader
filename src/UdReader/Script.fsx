@@ -20,7 +20,8 @@ open MTech.UdReader
 //let u = UdReader(@"D:\Users\mdonnelly\Documents\data\comtrade\testdata\testasciicomtrade.cfg") //testasciicomtrade testbincomtrade
 
 //let u = UdReader(@"D:\Users\mdonnelly\Documents\data\PSLF_cases\2mach - Copy\pslf.chf") 
-let u = UdReader(@"D:\Users\mdonnelly\Documents\data\PSLF_cases\2mach - Copy\chans\case1.chf") 
+//let u = UdReader(@"D:\Users\mdonnelly\Documents\data\PSLF_cases\2mach - Copy\chans\case1.chf") 
+let u = UdReader(@"D:\Users\mdonnelly\Downloads\pslf.chf") 
 
 //let u = UdReader(@"D:\Users\mdonnelly\Documents\data\comtrade\testdata\0\C37118-CJB_0-20130619000000.cfg")
 //let u = UdReader(@"D:\Users\mdonnelly\Documents\data\comtrade\testdata\00\C37118-CJB-20130619000000.cfg")
