@@ -155,7 +155,7 @@ let parseChfInfo bytearr =
         // Add the tdef to the beginning of the channel list
         Channels = tdef :: chans 
         BytePointer = bytptr }
-    if hdr.Version < 17u || hdr.Version > 20u then 
+    if hdr.Version < 17u then 
         let errmsg = "Invalid chf file. Incorrect version number."
         raise (System.IO.InvalidDataException(errmsg)) 
     // Return the header
